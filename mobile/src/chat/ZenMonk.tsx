@@ -4,7 +4,7 @@ import { authRequest } from "../auth/api";
 import { colors } from "../theme/colors";
 
 type Chat = { id: number; title: string };
-type Message = { id: number; role: "user" | "guide"; text: string };
+type Message = { id: number; role: "user" | "guide" | "ai"; text: string };
 
 export default function ZenMonk({ token }: { token: string }) {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -52,7 +52,7 @@ export default function ZenMonk({ token }: { token: string }) {
 
   return (
     <View style={styles.stack}>
-      <Text style={styles.text}>A space to write and reflect with guided prompts.</Text>
+      <Text style={styles.text}>A space to write and reflect.</Text>
       {error ? <Text accessibilityRole="alert" style={styles.text}>{error}</Text> : null}
       {chat === null ? <>
         <Button color={colors.button} disabled={busy} title="New conversation" onPress={() => void run(async () => {
@@ -72,12 +72,12 @@ export default function ZenMonk({ token }: { token: string }) {
           setChat(null);
         })} />
         {messages.map(message => <View key={message.id} style={styles.card}>
-          <Text style={styles.label}>{message.role === "user" ? "You" : "Zen Monk"}</Text>
+          <Text style={styles.label}>{message.role === "user" ? "You" : message.role === "ai" ? "Zen Monk" : "Guided prompt"}</Text>
           <Text style={styles.text}>{message.text}</Text>
         </View>)}
         <TextInput accessibilityLabel="Reflection message" placeholder="What’s on your mind?" placeholderTextColor={colors.mutedText}
           multiline editable={!busy} maxLength={1000} value={text} onChangeText={setText} style={styles.input} />
-        <Button color={colors.button} disabled={busy || !text.trim()} title="Send" onPress={() => void run(async () => {
+        <Button color={colors.button} disabled={busy || !text.trim()} title={busy ? "Waiting for reply…" : "Send"} onPress={() => void run(async () => {
           setMessages(await authRequest<Message[]>("/chats/" + chat, { text }, token));
           setText("");
         })} />

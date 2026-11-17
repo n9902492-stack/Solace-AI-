@@ -1,3 +1,5 @@
+import { replyWithLocalModel } from "./zen-model.mjs";
+
 export function setupChat(db) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS chats (
@@ -14,6 +16,8 @@ export function setupChat(db) {
     "What would make the next hour feel a little easier?",
     "Is there anything you want to give yourself permission to set aside?",
   ];
+
+  const pending = new Set();
 
   return async function chat(request, send, readBody, userId) {
     const path = request.url;
@@ -43,20 +47,32 @@ export function setupChat(db) {
     const message = typeof body?.text === "string" ? body.text.trim() : "";
     if (!message || message.length > 1000) return send(400, { error: "Enter a message of 1–1000 characters." });
     if (!ownsChat()) return send(404, { error: "Chat not found." });
-    const count = db.prepare("SELECT COUNT(*) AS count FROM messages WHERE chat_id = ?").get(id).count;
-    db.exec("BEGIN");
+    if (pending.has(id)) return send(409, { error: "Wait for the current reply before sending again." });
+    pending.add(id);
     try {
-      const insert = db.prepare("INSERT INTO messages (chat_id, role, text) VALUES (?, ?, ?)");
-      insert.run(id, "user", message);
-      insert.run(id, "guide", prompts[(count / 2) % prompts.length]);
-      if (count === 0) {
-        db.prepare("UPDATE chats SET title = ? WHERE id = ?").run(Array.from(message).slice(0, 45).join(""), id);
+      const recent = db.prepare(
+        "SELECT role, text FROM messages WHERE chat_id = ? ORDER BY id DESC LIMIT 8",
+      ).all(id).reverse();
+      const reply = await replyWithLocalModel(recent, message);
+      if (!ownsChat()) return send(404, { error: "Chat not found." });
+
+      const count = db.prepare("SELECT COUNT(*) AS count FROM messages WHERE chat_id = ?").get(id).count;
+      db.exec("BEGIN");
+      try {
+        const insert = db.prepare("INSERT INTO messages (chat_id, role, text) VALUES (?, ?, ?)");
+        insert.run(id, "user", message);
+        insert.run(id, reply ? "ai" : "guide", reply ?? prompts[(count / 2) % prompts.length]);
+        if (count === 0) {
+          db.prepare("UPDATE chats SET title = ? WHERE id = ?").run(Array.from(message).slice(0, 45).join(""), id);
+        }
+        db.exec("COMMIT");
+      } catch (error) {
+        db.exec("ROLLBACK");
+        throw error;
       }
-      db.exec("COMMIT");
-    } catch (error) {
-      db.exec("ROLLBACK");
-      throw error;
+      return send(201, readMessages());
+    } finally {
+      pending.delete(id);
     }
-    return send(201, readMessages());
   };
 }
