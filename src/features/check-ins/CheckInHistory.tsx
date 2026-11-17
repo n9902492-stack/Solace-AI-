@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { readCheckIns } from "./mood-storage";
 import { readGuidedCheckIns, type GuidedCheckIn } from "./guided-storage";
-import { topics, type Topic } from "./questions";
+import { topicIds, topics, type Topic } from "./questions";
 import type { CheckIn } from "./mood";
 
 export default function CheckInHistory() {
@@ -35,11 +35,10 @@ export default function CheckInHistory() {
         Filter check-ins
         <select value={filter} onChange={event => {
           const value = event.currentTarget.value;
-          setFilter(value === "mood" || value === "anxiety" ? value : "all");
+          setFilter(topicIds.find(id => id === value) ?? "all");
         }}>
           <option value="all">All check-ins</option>
-          <option value="mood">{topics.mood.title}</option>
-          <option value="anxiety">{topics.anxiety.title}</option>
+          {topicIds.map(id => <option key={id} value={id}>{topics[id].title}</option>)}
         </select>
       </label>
       {!visible.length ? <p role="status">No check-ins for this topic yet.</p> : (

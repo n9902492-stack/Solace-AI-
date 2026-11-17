@@ -53,3 +53,5 @@ button.topic-card strong { font-size: 1.25rem; }
 .history summary { width: fit-content; min-height: 44px; padding-block: .65rem; cursor: pointer; }
 .history-answers { display: grid; gap: .75rem; margin: .25rem 0; }
 .history-answers dd { margin: .2rem 0 0; font-weight: 600; }
+
+.topic-card.self-love { background: #d4c7ea; }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { options, topics, type Answer, type Topic } from "./questions";
+import { options, topicIds, topics, type Answer, type Topic } from "./questions";
 import { saveGuidedCheckIn } from "./guided-storage";
 
 export default function GuidedCheckIn() {
@@ -31,12 +31,12 @@ export default function GuidedCheckIn() {
     <section className="guided">
       <h1>Check-ins</h1>
       <p>Take a moment to reflect on how you have been feeling.</p>
-      <button className="topic-card mood" onClick={() => setTopic("mood")}>
-        <strong>{topics.mood.title}</strong><span>{topics.mood.description}</span>
-      </button>
-      <button className="topic-card anxiety" onClick={() => setTopic("anxiety")}>
-        <strong>{topics.anxiety.title}</strong><span>{topics.anxiety.description}</span>
-      </button>
+      {topicIds.map(id => (
+        <button key={id} className={`topic-card ${id}`} onClick={() => setTopic(id)}>
+          <strong>{topics[id].title}</strong>
+          <span>{topics[id].description}</span>
+        </button>
+      ))}
     </section>
   );
 
@@ -44,7 +44,7 @@ export default function GuidedCheckIn() {
   const step = answers.length;
   if (step === questions.length) return (
     <section className="guided">
-      <div className="topic-card mood"><h1>Check-in saved</h1><p>{title} · 4 of 4 questions</p></div>
+      <div className={`topic-card ${topic}`}><h1>Check-in saved</h1><p>{title} · {step} of {questions.length} questions</p></div>
       <div className="wellness-card">
         <h2>Your wellness moves</h2>
         <ol>{moves.map(move => <li key={move}>{move}</li>)}</ol>
