@@ -7,7 +7,7 @@ A mobile-first wellness prototype built with Next.js, React, and TypeScript.
 Use Node.js 22 or later. Extract the GitHub ZIP and open a terminal in the extracted folder.
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
@@ -22,3 +22,14 @@ Open http://localhost:3000. Run `npm run build` to check the production build.
 5. Open Zen Monk and choose a guided reflection prompt.
 
 Check-ins are for personal reflection and are saved in the current browser. Each completed guided check-in earns 48 XP. Each level takes 100 XP. Resource checklist progress resets when switching guides. Zen Monk uses built-in prompts.
+
+## Project structure
+
+- `src/app/` contains the routes, shared layout, and global styles.
+- `src/components/` contains the shared bottom navigation.
+- `src/features/check-ins/` contains the question sets, answer flow, history, and browser storage. Older single-mood entries are read from their original storage key.
+- `src/features/dashboard/` contains the home screen, which derives XP, level, and streak from saved guided check-ins.
+
+The route at `/today` renders `GuidedCheckIn`. It reads the four questions from
+`questions.ts` and saves a completed set through `guided-storage.ts`. The History
+page and Home dashboard then read those saved entries.

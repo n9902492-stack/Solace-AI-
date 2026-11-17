@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { readCheckIns } from "../lib/check-in-storage";
-import { readGuidedCheckIns, topics, type GuidedCheckIn } from "../lib/guided-check-ins";
-import type { CheckIn } from "../types/check-in";
+import { readCheckIns } from "./mood-storage";
+import { readGuidedCheckIns, type GuidedCheckIn } from "./guided-storage";
+import { topics } from "./questions";
+import type { CheckIn } from "./mood";
 
 export default function CheckInHistory() {
   const [history, setHistory] = useState<Array<CheckIn | GuidedCheckIn> | null>(null);

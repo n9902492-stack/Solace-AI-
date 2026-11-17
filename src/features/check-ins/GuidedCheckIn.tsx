@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { options, saveGuidedCheckIn, topics, type Answer, type Topic } from "../lib/guided-check-ins";
+import { options, topics, type Answer, type Topic } from "./questions";
+import { saveGuidedCheckIn } from "./guided-storage";
 
 export default function GuidedCheckIn() {
   const [topic, setTopic] = useState<Topic | null>(null);

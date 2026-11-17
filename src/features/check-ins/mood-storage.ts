@@ -1,4 +1,4 @@
-import { moods, type CheckIn } from "../types/check-in";
+import { moods, type CheckIn } from "./mood";
 
 const key = "solace-check-ins-v1";
 

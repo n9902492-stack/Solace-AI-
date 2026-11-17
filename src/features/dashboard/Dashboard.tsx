@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { readGuidedCheckIns, type GuidedCheckIn } from "../lib/guided-check-ins";
+import { readGuidedCheckIns, type GuidedCheckIn } from "../check-ins/guided-storage";
 
 const shortcuts = [
   ["/companion", "Zen Monk", "Guided reflection"],

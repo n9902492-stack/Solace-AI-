@@ -26,21 +26,3 @@ export const topics = {
 export type Topic = keyof typeof topics;
 export const options = ["Not at all", "A little", "Often", "Nearly always"] as const;
 export type Answer = typeof options[number];
-
-const key = "solace-guided-check-ins-v1";
-
-export type GuidedCheckIn = {
-  id: string;
-  topic: Topic;
-  answers: Answer[];
-  createdAt: string;
-};
-
-export function readGuidedCheckIns(): GuidedCheckIn[] {
-  return JSON.parse(localStorage.getItem(key) ?? "[]");
-}
-
-export function saveGuidedCheckIn(topic: Topic, answers: Answer[]) {
-  const entry = { id: crypto.randomUUID(), topic, answers, createdAt: new Date().toISOString() };
-  localStorage.setItem(key, JSON.stringify([entry, ...readGuidedCheckIns()]));
-}
