@@ -1,3 +1,4 @@
+import { setupChat } from "./chat.mjs";
 import { createServer } from "node:http";
 import { createHash, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -23,6 +24,7 @@ db.exec(`
     expires_at INTEGER NOT NULL
   );
 `);
+const chat = setupChat(db);
 const hashToken = token => createHash("sha256").update(token).digest("hex");
 const findUser = db.prepare("SELECT * FROM users WHERE email = ?");
 const attempts = new Map();
@@ -88,6 +90,15 @@ const server = createServer(async (request, response) => {
       db.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(now);
       db.prepare("INSERT INTO sessions VALUES (?, ?, ?)").run(hashToken(token), user.id, now + 7 * 86400_000);
       return send(signup ? 201 : 200, { token, name: user.name });
+    }
+
+    if (path === "/chats" || path?.startsWith("/chats/")) {
+      const token = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.authorization ?? "")?.[1];
+      const session = token && db.prepare(
+        "SELECT user_id FROM sessions WHERE token_hash = ? AND expires_at > ?",
+      ).get(hashToken(token), Date.now());
+      if (!session) return send(401, { error: "Please log in." });
+      return await chat(request, send, readBody, session.user_id);
     }
 
     if (path === "/check-ins" && ["GET", "POST"].includes(request.method)) {

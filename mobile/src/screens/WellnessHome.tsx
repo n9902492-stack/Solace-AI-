@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { authRequest } from "../auth/api";
+import ZenMonk from "../chat/ZenMonk";
 import { colors } from "../theme/colors";
 
 type CheckIn = { id: number; mood: string; createdAt: string };
@@ -18,12 +19,6 @@ const guides = [
   ["Grounding", "Notice five things you can see, four you can feel, and three you can hear."],
   ["Wind down", "Dim the lights and take a few minutes away from your screen."],
 ] as const;
-
-const prompts = [
-  "What feeling would you like to make space for?",
-  "What is one small thing that would make today easier?",
-  "What would you say to a friend in your situation?",
-];
 
 function Action({ label, onPress }: { label: string; onPress: () => void }) {
   return (
@@ -97,7 +92,6 @@ export default function WellnessHome({ name, token }: { name: string; token: str
   }
 
   const [guide, setGuide] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState(0);
 
   return (
     <View style={styles.shell}>
@@ -147,11 +141,7 @@ export default function WellnessHome({ name, token }: { name: string; token: str
             {guide === label && <Text style={styles.body}>{detail}</Text>}
           </Pressable>
         ))}
-        {page === "Zen Monk" && <View style={styles.card}>
-          <Text style={styles.cardTitle}>Guided reflection</Text>
-          <Text accessibilityLiveRegion="polite" style={styles.body}>{prompts[prompt]}</Text>
-          <Action label="Another prompt" onPress={() => setPrompt((prompt + 1) % prompts.length)} />
-        </View>}
+        {page === "Zen Monk" && <ZenMonk token={token} />}
       </ScrollView>
       <View style={styles.nav}>
         {(["Home", "Check-in", "Breathe", "Resources", "Zen Monk"] as const).map(tab => (

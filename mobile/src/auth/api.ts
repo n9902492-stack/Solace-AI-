@@ -6,10 +6,10 @@ export class ApiError extends Error {
   }
 }
 
-export async function authRequest<T>(path: string, body?: object, token?: string): Promise<T> {
+export async function authRequest<T>(path: string, body?: object, token?: string, method = body ? "POST" : "GET"): Promise<T> {
   if (!baseUrl) throw new Error("Set EXPO_PUBLIC_API_URL to connect to Solace.");
   const response = await fetch(baseUrl + path, {
-    method: body ? "POST" : "GET",
+    method,
     headers: {
       ...(body && { "Content-Type": "application/json" }),
       ...(token && { Authorization: `Bearer ${token}` }),
