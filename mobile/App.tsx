@@ -12,6 +12,7 @@ const sessionKey = "solace.session";
 
 export default function App() {
   const [screen, setScreen] = useState<"loading" | "splash" | "onboarding" | "auth" | "home">("loading");
+  const [token, setToken] = useState("");
   const [name, setName] = useState("");
   const [sessionError, setSessionError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
@@ -23,6 +24,7 @@ export default function App() {
       const token = await SecureStore.getItemAsync(sessionKey);
       if (!token) return setScreen("splash");
       const profile = await authRequest<{ name: string }>("/auth/me", undefined, token);
+      setToken(token);
       setName(profile.name);
       setScreen("home");
     } catch (failure) {
@@ -50,6 +52,7 @@ export default function App() {
       const token = await SecureStore.getItemAsync(sessionKey);
       if (token) await authRequest("/auth/logout", {}, token);
       await SecureStore.deleteItemAsync(sessionKey);
+      setToken("");
       setName("");
       setScreen("auth");
     } catch {
@@ -75,12 +78,13 @@ export default function App() {
           <AuthScreen onSubmit={async (mode, values) => {
             const session = await authRequest<{ name: string; token: string }>("/auth/" + mode, values);
             await SecureStore.setItemAsync(sessionKey, session.token);
+            setToken(session.token);
             setName(session.name);
             setScreen("home");
           }} />
         )}
         {screen === "home" && <>
-          <WellnessHome name={name} />
+          <WellnessHome name={name} token={token} />
           <Pressable accessibilityRole="button" disabled={loggingOut} onPress={logout}>
             <Text style={styles.action}>{loggingOut ? "Logging out…" : "Log out"}</Text>
           </Pressable>

@@ -13,6 +13,11 @@ db.exec(`
     id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
     salt TEXT NOT NULL, password_hash TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS check_ins (
+    id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id),
+    mood TEXT NOT NULL, created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS check_ins_user ON check_ins(user_id, id DESC);
   CREATE TABLE IF NOT EXISTS sessions (
     token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id),
     expires_at INTEGER NOT NULL
@@ -83,6 +88,30 @@ const server = createServer(async (request, response) => {
       db.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(now);
       db.prepare("INSERT INTO sessions VALUES (?, ?, ?)").run(hashToken(token), user.id, now + 7 * 86400_000);
       return send(signup ? 201 : 200, { token, name: user.name });
+    }
+
+    if (path === "/check-ins" && ["GET", "POST"].includes(request.method)) {
+      const token = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.authorization ?? "")?.[1];
+      const session = token && db.prepare(
+        "SELECT user_id FROM sessions WHERE token_hash = ? AND expires_at > ?",
+      ).get(hashToken(token), Date.now());
+      if (!session) return send(401, { error: "Please log in." });
+
+      if (request.method === "GET") {
+        return send(200, db.prepare(
+          "SELECT id, mood, created_at AS createdAt FROM check_ins WHERE user_id = ? ORDER BY id DESC LIMIT 100",
+        ).all(session.user_id));
+      }
+
+      const body = await readBody(request);
+      if (!["Low", "Uneasy", "Okay", "Good", "Great"].includes(body?.mood)) {
+        return send(400, { error: "Choose a mood before saving." });
+      }
+      const createdAt = new Date().toISOString();
+      const result = db.prepare(
+        "INSERT INTO check_ins (user_id, mood, created_at) VALUES (?, ?, ?)",
+      ).run(session.user_id, body.mood, createdAt);
+      return send(201, { id: Number(result.lastInsertRowid), mood: body.mood, createdAt });
     }
 
     if ((path === "/auth/me" && request.method === "GET") ||

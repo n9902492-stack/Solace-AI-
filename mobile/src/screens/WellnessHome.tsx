@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { authRequest } from "../auth/api";
 import { colors } from "../theme/colors";
+
+type CheckIn = { id: number; mood: string; createdAt: string };
 
 type Page = "Home" | "Check-in" | "Breathe" | "Resources" | "Zen Monk";
 
@@ -61,9 +64,38 @@ function Breathing() {
   );
 }
 
-export default function WellnessHome({ name }: { name: string }) {
+export default function WellnessHome({ name, token }: { name: string; token: string }) {
   const [page, setPage] = useState<Page>("Home");
   const [mood, setMood] = useState("");
+  const [history, setHistory] = useState<CheckIn[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    authRequest<CheckIn[]>("/check-ins", undefined, token)
+      .then(entries => { if (active) setHistory(entries); })
+      .catch(() => { if (active) setError("Could not load your check-ins."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [token]);
+
+  async function saveMood() {
+    if (!mood || saving) return;
+    setSaving(true);
+    setError("");
+    try {
+      const entry = await authRequest<CheckIn>("/check-ins", { mood }, token);
+      setHistory(previous => [entry, ...previous].slice(0, 100));
+      setMood("");
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Could not save your check-in.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const [guide, setGuide] = useState<string | null>(null);
   const [prompt, setPrompt] = useState(0);
 
@@ -78,7 +110,7 @@ export default function WellnessHome({ name }: { name: string }) {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Today’s affirmation</Text>
             <Text style={styles.body}>You can begin again, as many times as it takes.</Text>
-            {mood ? <Text style={styles.body}>This session’s mood: {mood}</Text> : null}
+            {history[0] ? <Text style={styles.body}>Latest check-in: {history[0].mood}</Text> : null}
           </View>
           {activities.map(([label, detail]) => (
             <Pressable key={label} accessibilityRole="button" style={styles.card} onPress={() => setPage(label)}>
@@ -91,11 +123,21 @@ export default function WellnessHome({ name }: { name: string }) {
           <Text style={styles.body}>How are you feeling right now?</Text>
           {["Low", "Uneasy", "Okay", "Good", "Great"].map(option => (
             <Pressable key={option} accessibilityRole="button" accessibilityState={{ selected: mood === option }}
-              style={[styles.card, mood === option && styles.selected]} onPress={() => setMood(option)}>
+              disabled={saving} style={[styles.card, mood === option && styles.selected]} onPress={() => setMood(option)}>
               <Text style={styles.cardTitle}>{option}</Text>
             </Pressable>
           ))}
-          {mood ? <Text accessibilityLiveRegion="polite" style={styles.body}>Mood noted for this session: {mood}</Text> : null}
+          {mood && !saving && !loading ? <Action label="Save check-in" onPress={saveMood} /> : null}
+          {error ? <Text accessibilityRole="alert" style={styles.body}>{error}</Text> : null}
+          <Text accessibilityRole="header" style={styles.cardTitle}>Recent check-ins</Text>
+          {loading ? <Text style={styles.body}>Loading your check-ins…</Text> : null}
+          {!loading && !error && !history.length ? <Text style={styles.body}>Your saved moods will appear here.</Text> : null}
+          {history.map(entry => (
+            <View key={entry.id} style={styles.card}>
+              <Text style={styles.cardTitle}>{entry.mood}</Text>
+              <Text style={styles.body}>{new Date(entry.createdAt).toLocaleString()}</Text>
+            </View>
+          ))}
         </>}
         {page === "Breathe" && <Breathing />}
         {page === "Resources" && guides.map(([label, detail]) => (
