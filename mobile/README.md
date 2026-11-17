@@ -56,3 +56,29 @@ Tapping one opens Check-in or Breathe after account access is restored.
 Verify on a physical Android and iOS device with notifications enabled:
 schedule both reminders, change one time, and check delivery and navigation
 in the foreground, background, and after closing the app.
+
+## Android APK for the demo
+
+Run these commands from `mobile/` with your Expo account:
+
+```sh
+npx eas-cli login
+npx eas-cli init
+npx eas-cli env:create --environment preview --name EXPO_PUBLIC_API_URL --value https://YOUR-API-HOST --visibility plaintext
+npx eas-cli build --platform android --profile preview
+```
+
+Replace the example URL with the deployed Solace API URL. Keep the Node.js API
+running behind HTTPS with persistent storage for `server/data/`. The API URL
+is public configuration bundled into the app. The preview profile produces
+an installable APK. Download it from the completed EAS build and install it on
+an Android phone.
+
+Before recording the demo, check on that phone:
+
+1. Create an account, relaunch the app, log out, and log back in.
+2. Save a mood and confirm it remains in Recent check-ins after relaunch.
+3. Start a Zen Monk chat, resume it, and delete it. For the live AI demo,
+   enable the local model on the API host and verify an actual model reply.
+4. Schedule a reminder for a nearby time, background or close the app
+   normally, then check delivery and tap routing. Test both reminder types.
