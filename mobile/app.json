@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Solace",
+    "slug": "solace-mobile",
+    "orientation": "portrait",
+    "ios": {
+      "bundleIdentifier": "com.solace.wellness"
+    },
+    "android": {
+      "package": "com.solace.wellness"
+    }
+  }
+}
