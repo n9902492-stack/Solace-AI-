@@ -5,6 +5,7 @@ import { colors } from "../theme/colors";
 type Props = {
   screen: "splash" | "onboarding" | "home";
   onContinue: () => void;
+  name?: string;
 };
 
 const slides = [
@@ -13,7 +14,7 @@ const slides = [
   { title: "Meet Zen Monk.", body: "Zen Monk is Solace’s companion for reflecting on your feelings and finding a small next step." },
 ];
 
-export default function Welcome({ screen, onContinue }: Props) {
+export default function Welcome({ screen, onContinue, name }: Props) {
   const [step, setStep] = useState(0);
   const lastStep = step === slides.length - 1;
 
@@ -27,7 +28,7 @@ export default function Welcome({ screen, onContinue }: Props) {
 
   const content = screen === "onboarding" ? slides[step] : screen === "splash"
     ? { title: "", body: "A little space to check in, breathe, and care for yourself." }
-    : { title: "How are you feeling today?", body: "You can begin again, as many times as it takes." };
+    : { title: name ? `Welcome, ${name}.` : "How are you feeling today?", body: "You can begin again, as many times as it takes." };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -55,7 +56,7 @@ export default function Welcome({ screen, onContinue }: Props) {
           {screen === "onboarding" && <Text style={styles.counter}>Step {step + 1} of {slides.length}</Text>}
           <Pressable accessibilityRole="button" style={styles.button} onPress={advance}>
             <Text style={styles.buttonLabel}>
-              {screen === "splash" ? "Get started" : lastStep ? "Go to Home" : "Continue"}
+              {screen === "splash" ? "Get started" : lastStep ? "Continue to account" : "Continue"}
             </Text>
           </Pressable>
           {screen === "onboarding" && step > 0 && (
