@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { readCheckIns } from "../lib/check-in-storage";
+import { readGuidedCheckIns, topics, type GuidedCheckIn } from "../lib/guided-check-ins";
 import type { CheckIn } from "../types/check-in";
 
 export default function CheckInHistory() {
-  const [history, setHistory] = useState<CheckIn[] | null>(null);
+  const [history, setHistory] = useState<Array<CheckIn | GuidedCheckIn> | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     try {
-      setHistory(readCheckIns());
+      setHistory([...readCheckIns(), ...readGuidedCheckIns()].sort(
+        (first, second) => Date.parse(second.createdAt) - Date.parse(first.createdAt),
+      ));
     } catch {
       setFailed(true);
     }
@@ -24,9 +27,9 @@ export default function CheckInHistory() {
     <ul className="history">
       {history.map(entry => (
         <li key={entry.id}>
-          <strong>{entry.mood}</strong>
+          <strong>{"topic" in entry ? topics[entry.topic].title : entry.mood}</strong>
           <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleString()}</time>
-          {entry.note && <p>{entry.note}</p>}
+          {"answers" in entry ? <span>{entry.answers.length} questions answered</span> : entry.note && <p>{entry.note}</p>}
         </li>
       ))}
     </ul>
