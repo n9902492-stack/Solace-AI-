@@ -151,7 +151,7 @@ export default function WellnessHome({ name, token, page, setPage }: {
         {(["Home", "Check-in", "Breathe", "Resources", "Zen Monk"] as const).map(tab => (
           <Pressable key={tab} accessibilityRole="tab" accessibilityState={{ selected: page === tab }}
             style={[styles.tab, page === tab && styles.selected]} onPress={() => setPage(tab)}>
-            <Text style={styles.tabText}>{tab}</Text>
+            <Text style={styles.tabText} numberOfLines={1} adjustsFontSizeToFit>{tab}</Text>
           </Pressable>
         ))}
       </View>
@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
   body: { color: colors.mutedText, fontSize: 16, lineHeight: 24 },
   button: { minHeight: 48, justifyContent: "center", alignItems: "center", borderRadius: 14, backgroundColor: colors.button },
   buttonText: { color: colors.buttonText, fontWeight: "700" },
-  nav: { width: "100%", maxWidth: 480, alignSelf: "center", flexDirection: "row", paddingHorizontal: 8, gap: 4 },
-  tab: { flex: 1, minHeight: 48, paddingVertical: 6, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  tabText: { color: colors.accent, fontSize: 12, fontWeight: "600", textAlign: "center" },
+  nav: { width: "100%", maxWidth: 480, alignSelf: "center", flexDirection: "row", paddingHorizontal: 4, gap: 2 },
+  tab: { flex: 1, minWidth: 0, minHeight: 48, paddingHorizontal: 2, paddingVertical: 6, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  tabText: { width: "100%", color: colors.accent, fontSize: 12, fontWeight: "600", textAlign: "center" },
   selected: { backgroundColor: "#D7DFC9" },
 });
