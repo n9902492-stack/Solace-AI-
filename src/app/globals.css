@@ -45,7 +45,17 @@ button.topic-card strong { font-size: 1.25rem; }
 .quick-start a:nth-child(2) { background: #a6d7c4; }
 .quick-start a:nth-child(3) { background: #f5de87; }
 .quick-start a:nth-child(4) { background: #ffc7a6; }
-.breathing-circle { display: grid; place-content: center; text-align: center; gap: .35rem; width: 10rem; aspect-ratio: 1; border-radius: 50%; margin: 1.5rem auto; background: #a6d7c4; }
+.breathing-circle { position: relative; isolation: isolate; display: grid; place-content: center; text-align: center; gap: .35rem; width: 10rem; aspect-ratio: 1; margin: 2.5rem auto; }
+.breathing-circle::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: #a6d7c4; }
+.breathing-circle[data-phase="hold"]::before { transform: scale(1.2); }
+@media (prefers-reduced-motion: no-preference) {
+  .breathing-circle[data-phase="inhale"]::before { animation: breathing-expand 4s linear both; }
+  .breathing-circle[data-phase="exhale"]::before { animation: breathing-expand 6s linear reverse both; }
+}
+@keyframes breathing-expand {
+  from { transform: scale(1); }
+  to { transform: scale(1.2); }
+}
 .resourceStep { display: flex; align-items: flex-start; gap: .55rem; }
 
 .history-filter { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }

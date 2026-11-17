@@ -3,8 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const cycleLength = 14;
-const duration = cycleLength * 4;
+const phases = [
+  { id: "inhale", label: "Breathe in", endsAt: 4 },
+  { id: "hold", label: "Hold gently", endsAt: 8 },
+  { id: "exhale", label: "Breathe out", endsAt: 14 },
+] as const;
+
+const cycleLength = phases[2].endsAt;
+const cycles = 4;
+const duration = cycleLength * cycles;
 
 export default function Breathe() {
   const [started, setStarted] = useState<number | null>(null);
@@ -26,18 +33,20 @@ export default function Breathe() {
   const running = started !== null;
   const completed = elapsed === duration;
   const position = elapsed % cycleLength;
-  const phase = position < 4 ? "Breathe in" : position < 8 ? "Hold gently" : "Breathe out";
-  const remaining = (position < 4 ? 4 : position < 8 ? 8 : 14) - position;
+  const phase = phases.find(item => position < item.endsAt) ?? phases[0];
+  const remaining = phase.endsAt - position;
+  const cycle = Math.floor(elapsed / cycleLength) + 1;
 
   return (
     <section className="guided">
       <Link href="/">← Home</Link>
       <h1>Guided breathing</h1>
       <p>4 seconds in · 4 hold · 6 out · 4 cycles. Breathe at your own pace if you prefer.</p>
-      <div className="breathing-circle">
-        <strong aria-live="polite">{running ? phase : completed ? "Session complete" : "Ready?"}</strong>
-        {running && <span>{remaining}s · Cycle {Math.floor(elapsed / cycleLength) + 1}/4</span>}
+      <div className="breathing-circle" data-phase={running ? phase.id : "rest"}>
+        <strong aria-live="polite">{running ? phase.label : completed ? "Session complete" : "Ready?"}</strong>
+        {running && <span>{remaining}s · Cycle {cycle}/{cycles}</span>}
       </div>
+      <progress aria-label="Breathing session progress" value={elapsed} max={duration} />
       <button className="button" onClick={() => {
         setElapsed(0);
         setStarted(running ? null : Date.now());
