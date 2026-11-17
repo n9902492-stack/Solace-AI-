@@ -37,3 +37,13 @@ button.topic-card strong { font-size: 1.25rem; }
 .guided progress { width: 100%; accent-color: #275746; }
 .answer-button { border: 1px solid #e4e2cb; border-radius: 2rem; min-height: 44px; padding: .65rem 1rem; text-align: left; font: inherit; color: inherit; }
 .guided-back { justify-self: start; border: 0; background: transparent; color: inherit; font: inherit; min-height: 44px; }
+
+.dashboard h2 { margin-block-start: .35rem; }
+.dashboard-link { text-decoration: none; }
+.quick-start { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.quick-start a:nth-child(1) { background: #d4c7ea; }
+.quick-start a:nth-child(2) { background: #a6d7c4; }
+.quick-start a:nth-child(3) { background: #f5de87; }
+.quick-start a:nth-child(4) { background: #ffc7a6; }
+.breathing-circle { display: grid; place-content: center; text-align: center; gap: .35rem; width: 10rem; aspect-ratio: 1; border-radius: 50%; margin: 1.5rem auto; background: #a6d7c4; }
+.resourceStep { display: flex; align-items: flex-start; gap: .55rem; }
