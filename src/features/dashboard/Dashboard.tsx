@@ -58,6 +58,10 @@ export default function Dashboard() {
         <span>Daily check-in</span>
         <strong>{checkedIn ? "You showed up today" : "Take a moment to check in"}</strong>
       </Link>
+      <Link className="wellness-card dashboard-link" href="/habits">
+        <strong>Daily habits</strong>
+        <span>Choose a small action for today</span>
+      </Link>
       <h2>Quick start</h2>
       <div className="quick-start">
         {shortcuts.map(([href, title, description]) => (
