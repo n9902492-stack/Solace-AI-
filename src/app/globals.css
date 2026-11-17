@@ -47,3 +47,9 @@ button.topic-card strong { font-size: 1.25rem; }
 .quick-start a:nth-child(4) { background: #ffc7a6; }
 .breathing-circle { display: grid; place-content: center; text-align: center; gap: .35rem; width: 10rem; aspect-ratio: 1; border-radius: 50%; margin: 1.5rem auto; background: #a6d7c4; }
 .resourceStep { display: flex; align-items: flex-start; gap: .55rem; }
+
+.history-filter { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.history-filter select { min-height: 44px; padding: .4rem .65rem; border: 1px solid #81978a; border-radius: .75rem; background: #fffef7; color: inherit; font: inherit; }
+.history summary { width: fit-content; min-height: 44px; padding-block: .65rem; cursor: pointer; }
+.history-answers { display: grid; gap: .75rem; margin: .25rem 0; }
+.history-answers dd { margin: .2rem 0 0; font-weight: 600; }

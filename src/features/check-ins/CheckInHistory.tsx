@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { readCheckIns } from "./mood-storage";
 import { readGuidedCheckIns, type GuidedCheckIn } from "./guided-storage";
-import { topics } from "./questions";
+import { topics, type Topic } from "./questions";
 import type { CheckIn } from "./mood";
 
 export default function CheckInHistory() {
   const [history, setHistory] = useState<Array<CheckIn | GuidedCheckIn> | null>(null);
+  const [filter, setFilter] = useState<"all" | Topic>("all");
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -24,15 +25,46 @@ export default function CheckInHistory() {
   if (!history) return <p role="status">Loading check-ins…</p>;
   if (!history.length) return <p>Your first check-in will appear here.</p>;
 
+  const visible = filter === "all" ? history : history.filter(
+    entry => "topic" in entry && entry.topic === filter,
+  );
+
   return (
-    <ul className="history">
-      {history.map(entry => (
-        <li key={entry.id}>
-          <strong>{"topic" in entry ? topics[entry.topic].title : entry.mood}</strong>
-          <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleString()}</time>
-          {"answers" in entry ? <span>{entry.answers.length} questions answered</span> : entry.note && <p>{entry.note}</p>}
-        </li>
-      ))}
-    </ul>
+    <>
+      <label className="history-filter">
+        Filter check-ins
+        <select value={filter} onChange={event => {
+          const value = event.currentTarget.value;
+          setFilter(value === "mood" || value === "anxiety" ? value : "all");
+        }}>
+          <option value="all">All check-ins</option>
+          <option value="mood">{topics.mood.title}</option>
+          <option value="anxiety">{topics.anxiety.title}</option>
+        </select>
+      </label>
+      {!visible.length ? <p role="status">No check-ins for this topic yet.</p> : (
+        <ul className="history">
+          {visible.map(entry => (
+            <li key={entry.id}>
+              <strong>{"topic" in entry ? topics[entry.topic].title : entry.mood}</strong>
+              <time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleString()}</time>
+              {"topic" in entry ? (
+                <details>
+                  <summary>View {entry.answers.length} answers</summary>
+                  <dl className="history-answers">
+                    {entry.answers.map((answer, index) => (
+                      <div key={index}>
+                        <dt>{topics[entry.topic].questions[index] ?? `Question ${index + 1}`}</dt>
+                        <dd>{answer}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </details>
+              ) : entry.note && <p>{entry.note}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
   );
 }
