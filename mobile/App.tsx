@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StatusBar, StyleSheet, Text } from "react
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import Welcome from "./src/screens/Welcome";
+import WellnessHome from "./src/screens/WellnessHome";
 import AuthScreen from "./src/auth/AuthScreen";
 import { ApiError, authRequest } from "./src/auth/api";
 import { colors } from "./src/theme/colors";
@@ -79,7 +80,7 @@ export default function App() {
           }} />
         )}
         {screen === "home" && <>
-          <Welcome screen="home" name={name} onContinue={() => {}} />
+          <WellnessHome name={name} />
           <Pressable accessibilityRole="button" disabled={loggingOut} onPress={logout}>
             <Text style={styles.action}>{loggingOut ? "Logging out…" : "Log out"}</Text>
           </Pressable>
