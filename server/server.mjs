@@ -2,12 +2,15 @@ import { setupChat } from "./chat.mjs";
 import { createServer } from "node:http";
 import { createHash, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { promisify } from "node:util";
 
 const deriveKey = promisify(scrypt);
-mkdirSync(new URL("./data/", import.meta.url), { recursive: true });
-const db = new DatabaseSync(new URL("./data/solace.sqlite", import.meta.url));
+const dataDirectory = process.env.SOLACE_DATA_DIR || fileURLToPath(new URL("./data/", import.meta.url));
+mkdirSync(dataDirectory, { recursive: true });
+const db = new DatabaseSync(join(dataDirectory, "solace.sqlite"));
 db.exec(`
   PRAGMA foreign_keys = ON;
   CREATE TABLE IF NOT EXISTS users (
@@ -49,6 +52,10 @@ const server = createServer(async (request, response) => {
 
   try {
     const path = request.url;
+    if (request.method === "GET" && path === "/health") {
+      db.prepare("SELECT id FROM users LIMIT 1").get();
+      return send(200, { status: "ok" });
+    }
     if (request.method === "POST" && (path === "/auth/signup" || path === "/auth/login")) {
       const now = Date.now();
       for (const [ip, entry] of attempts) {
