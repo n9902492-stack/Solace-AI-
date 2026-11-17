@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { colors } from "../theme/colors";
 
 type Props = {
   screen: "splash" | "onboarding" | "home";
@@ -25,15 +26,28 @@ export default function Welcome({ screen, onContinue }: Props) {
   }
 
   const content = screen === "onboarding" ? slides[step] : screen === "splash"
-    ? { title: "A moment for yourself.", body: "A little space to check in, breathe, and care for yourself." }
+    ? { title: "", body: "A little space to check in, breathe, and care for yourself." }
     : { title: "How are you feeling today?", body: "You can begin again, as many times as it takes." };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.brand}>Solace</Text>
       <View style={styles.content}>
-        <View style={styles.shape} accessible={false} />
-        <Text accessibilityRole="header" style={styles.title}>{content.title}</Text>
+        {screen === "splash" && (
+          <View style={styles.hero} accessible={false}>
+            <Image
+              source={{ uri: "https://images.unsplash.com/photo-1572242596859-ddcf5aa0594a?auto=format&fit=crop&w=850&q=80" }}
+              style={styles.heroImage}
+              resizeMode="cover"
+              accessible={false}
+            />
+          </View>
+        )}
+        <Text accessibilityRole="header" style={styles.title}>
+          {screen === "splash" ? (
+            <>A moment{"\n"}<Text style={styles.titleAccent}>for yourself.</Text></>
+          ) : content.title}
+        </Text>
         <Text style={styles.body}>{content.body}</Text>
       </View>
       {screen !== "home" && (
@@ -57,15 +71,17 @@ export default function Welcome({ screen, onContinue }: Props) {
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, width: "100%", maxWidth: 480, alignSelf: "center", padding: 24, gap: 24 },
-  brand: { color: "#204539", fontSize: 21, fontWeight: "700" },
+  brand: { color: colors.accent, fontSize: 21, fontWeight: "700" },
   content: { flexGrow: 1, justifyContent: "center", gap: 16 },
-  shape: { width: 96, height: 96, borderRadius: 48, backgroundColor: "#a6d7c4", borderWidth: 12, borderColor: "#d9e9cf" },
-  title: { color: "#20392e", fontSize: 38, fontWeight: "700", letterSpacing: -1 },
-  body: { color: "#334c3e", fontSize: 17, lineHeight: 26 },
+  hero: { width: "100%", aspectRatio: 1.65, borderRadius: 24, overflow: "hidden", backgroundColor: colors.softIvory },
+  heroImage: { width: "100%", height: "100%" },
+  title: { color: colors.text, fontFamily: Platform.select({ ios: "Georgia", android: "serif", default: "serif" }), fontSize: 38, fontWeight: "700", letterSpacing: -0.8 },
+  titleAccent: { color: colors.accent },
+  body: { color: colors.mutedText, fontSize: 17, lineHeight: 26 },
   actions: { gap: 8 },
-  counter: { color: "#334c3e", textAlign: "center" },
-  button: { backgroundColor: "#275746", borderRadius: 18, minHeight: 52, alignItems: "center", justifyContent: "center", padding: 12 },
-  buttonLabel: { color: "white", fontSize: 16, fontWeight: "700" },
+  counter: { color: colors.mutedText, textAlign: "center" },
+  button: { backgroundColor: colors.button, borderRadius: 18, minHeight: 52, alignItems: "center", justifyContent: "center", padding: 12 },
+  buttonLabel: { color: colors.buttonText, fontSize: 16, fontWeight: "700" },
   back: { minHeight: 44, alignItems: "center", justifyContent: "center" },
-  backLabel: { color: "#204539", fontSize: 16 },
+  backLabel: { color: colors.accent, fontSize: 16 },
 });
