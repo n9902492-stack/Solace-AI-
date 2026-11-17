@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import { colors } from "../theme/colors";
-import { cancelReminder, reminderEnabled, reminders, scheduleReminder, type Reminder } from "./schedule";
+import { cancelReminder, reminderEnabled, scheduleReminder } from "./schedule";
+import { reminders, type Reminder } from "./destinations";
 
 function ReminderCard({ kind }: { kind: Reminder }) {
   const [time, setTime] = useState("");
@@ -60,6 +61,7 @@ export default function RemindersScreen() {
   return (
     <View style={styles.stack}>
       <Text style={styles.text}>Reminders use this device’s local time.</Text>
+      {Platform.OS === "web" && <Text style={styles.text}>Keep this tab open to receive browser reminders.</Text>}
       <ReminderCard kind="checkIn" />
       <ReminderCard kind="breathe" />
     </View>

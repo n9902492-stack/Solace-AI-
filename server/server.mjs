@@ -45,6 +45,20 @@ async function readBody(request) {
 }
 
 const server = createServer(async (request, response) => {
+  const origin = request.headers.origin;
+  const desktopOrigin = process.env.SOLACE_DESKTOP_ORIGIN;
+  if (desktopOrigin && origin === desktopOrigin) {
+    response.setHeader("Access-Control-Allow-Origin", desktopOrigin);
+    response.setHeader("Vary", "Origin");
+    if (request.method === "OPTIONS") {
+      response.writeHead(204, {
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      });
+      response.end();
+      return;
+    }
+  }
   function send(status, body) {
     response.writeHead(status, { "Content-Type": "application/json", "Cache-Control": "no-store" });
     response.end(JSON.stringify(body));

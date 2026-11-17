@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { authRequest } from "../auth/api";
 import RemindersScreen from "../reminders/RemindersScreen";
 import ZenMonk from "../chat/ZenMonk";
@@ -64,6 +64,8 @@ function Breathing() {
 export default function WellnessHome({ name, token, page, setPage }: {
   name: string; token: string; page: Page; setPage: (page: Page) => void;
 }) {
+  const { width } = useWindowDimensions();
+  const desktop = Platform.OS === "web" && width >= 800;
   const [mood, setMood] = useState("");
   const [history, setHistory] = useState<CheckIn[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +100,7 @@ export default function WellnessHome({ name, token, page, setPage }: {
 
   return (
     <View style={styles.shell}>
-      <ScrollView key={page} contentContainerStyle={styles.content}>
+      <ScrollView key={page} contentContainerStyle={[styles.content, desktop && styles.desktopContent]}>
         <Text style={styles.brand}>Solace</Text>
         <Text accessibilityRole="header" style={styles.title}>
           {page === "Home" ? `Welcome, ${name}.` : page}
@@ -111,12 +113,14 @@ export default function WellnessHome({ name, token, page, setPage }: {
             {history[0] ? <Text style={styles.body}>Latest check-in: {history[0].mood}</Text> : null}
           </View>
           <Action label="Reminders" onPress={() => setPage("Reminders")} />
+          <View style={desktop ? styles.activityGrid : styles.activityList}>
           {activities.map(([label, detail]) => (
-            <Pressable key={label} accessibilityRole="button" style={styles.card} onPress={() => setPage(label)}>
+            <Pressable key={label} accessibilityRole="button" style={[styles.card, desktop && styles.gridCard]} onPress={() => setPage(label)}>
               <Text style={styles.cardTitle}>{label}</Text>
               <Text style={styles.body}>{detail}</Text>
             </Pressable>
           ))}
+          </View>
         </>}
         {page === "Check-in" && <>
           <Text style={styles.body}>How are you feeling right now?</Text>
@@ -149,7 +153,7 @@ export default function WellnessHome({ name, token, page, setPage }: {
         {page === "Reminders" && <RemindersScreen />}
         {page === "Zen Monk" && <ZenMonk token={token} />}
       </ScrollView>
-      <View style={styles.nav}>
+      <View style={[styles.nav, desktop && styles.desktopNav]}>
         {(["Home", "Check-in", "Breathe", "Resources", "Zen Monk"] as const).map(tab => (
           <Pressable key={tab} accessibilityRole="tab" accessibilityState={{ selected: page === tab }}
             style={[styles.tab, page === tab && styles.selected]} onPress={() => setPage(tab)}>
@@ -164,6 +168,11 @@ export default function WellnessHome({ name, token, page, setPage }: {
 const styles = StyleSheet.create({
   shell: { flex: 1 },
   content: { width: "100%", maxWidth: 480, alignSelf: "center", padding: 24, gap: 12 },
+  desktopContent: { maxWidth: 920, paddingHorizontal: 32 },
+  desktopNav: { maxWidth: 920 },
+  activityGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  activityList: { gap: 12 },
+  gridCard: { flexBasis: "48%", flexGrow: 1 },
   brand: { color: colors.accent, fontSize: 19, fontWeight: "700" },
   title: { color: colors.text, fontFamily: Platform.select({ ios: "Georgia", android: "serif" }), fontSize: 34, fontWeight: "700" },
   card: { padding: 16, borderRadius: 16, backgroundColor: colors.softIvory, gap: 8 },

@@ -1,17 +1,12 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
-export const reminders = {
-  checkIn: { title: "Mood check-in", body: "Take a moment to notice how you feel.", page: "Check-in" },
-  breathe: { title: "Breathing break", body: "Make time for a quiet pause.", page: "Breathe" },
-} as const;
-
-export type Reminder = keyof typeof reminders;
+import { reminders, type Reminder, type ReminderDestination } from "./destinations";
 
 const channelId = "solace-reminders";
 const identifier = (kind: Reminder) => "solace-" + kind;
 
-export function reminderDestination(response: Notifications.NotificationResponse | null) {
+function reminderDestination(response: Notifications.NotificationResponse | null) {
   const id = response?.notification.request.identifier;
   if (id === identifier("checkIn")) return reminders.checkIn.page;
   if (id === identifier("breathe")) return reminders.breathe.page;
@@ -51,4 +46,26 @@ export async function scheduleReminder(kind: Reminder, hour: number, minute: num
       ...(Platform.OS === "android" ? { channelId } : {}),
     },
   });
+}
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+export function listenForReminders(open: (page: ReminderDestination) => void) {
+  function handle(response: Notifications.NotificationResponse | null) {
+    const destination = reminderDestination(response);
+    if (!destination) return;
+    open(destination);
+    void Notifications.clearLastNotificationResponseAsync().catch(() => {});
+  }
+
+  const subscription = Notifications.addNotificationResponseReceivedListener(handle);
+  handle(Notifications.getLastNotificationResponse());
+  return () => subscription.remove();
 }

@@ -83,18 +83,25 @@ Before recording the demo, check on that phone:
 4. Schedule a reminder for a nearby time, background or close the app
    normally, then check delivery and tap routing. Test both reminder types.
 
-## Windows release checklist
+## Desktop recording
 
-1. Deploy the API using [the server instructions](../server/README.md). In
-   PowerShell, run `Invoke-RestMethod "https://YOUR-API-HOST/health"`.
-   Continue when the response contains status `ok`.
-2. From the repository root, run `git pull --ff-only origin main` and
-   `Set-Location mobile`. Run `npm ci` and `npm run typecheck`.
-3. Use the Expo commands above to link the project, set the preview API URL,
-   and build the APK. Complete any Expo account or Android signing prompts
-   using the account that will own the project.
-4. Install the resulting APK on an Android phone and follow the device checks
-   above. Confirm that a Zen Monk message receives an actual model reply and
-   that a scheduled reminder opens the intended screen.
-5. Record the demo using a test account. Submit the APK and demo video
-   through the assignment's submission channel.
+Use two PowerShell terminals. From the repository root, start the local API:
+
+```powershell
+$env:SOLACE_DESKTOP_ORIGIN = "http://localhost:8081"
+npm --prefix server start
+```
+
+In a second terminal, from the repository root:
+
+```powershell
+cd mobile
+npm ci
+$env:EXPO_PUBLIC_API_URL = "http://localhost:4000"
+npx expo start --web --port 8081
+```
+
+Open http://localhost:8081 in Chrome or Edge and create a demo account. The
+browser uses the local SQLite database. Keep both terminals running while
+recording. Browser reminders need notification permission and an open signed-in
+tab. Actual AI replies still require the local model setup above.

@@ -1,23 +1,13 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StatusBar, StyleSheet, Text } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "./src/auth/session";
 import Welcome from "./src/screens/Welcome";
-import * as Notifications from "expo-notifications";
 import WellnessHome, { type Page } from "./src/screens/WellnessHome";
-import { reminderDestination } from "./src/reminders/schedule";
+import { listenForReminders } from "./src/reminders/schedule";
 import AuthScreen from "./src/auth/AuthScreen";
 import { ApiError, authRequest } from "./src/auth/api";
 import { colors } from "./src/theme/colors";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
 
 const sessionKey = "solace.session";
 
@@ -56,18 +46,7 @@ export default function App() {
 
   useEffect(() => { void restore(); }, []);
 
-  useEffect(() => {
-    function openReminder(response: Notifications.NotificationResponse | null) {
-      const destination = reminderDestination(response);
-      if (!destination) return;
-      setPage(destination);
-      void Notifications.clearLastNotificationResponseAsync().catch(() => {});
-    }
-
-    const subscription = Notifications.addNotificationResponseReceivedListener(openReminder);
-    openReminder(Notifications.getLastNotificationResponse());
-    return () => subscription.remove();
-  }, []);
+  useEffect(() => screen === "home" ? listenForReminders(setPage) : undefined, [screen]);
 
   async function logout() {
     if (loggingOut) return;
