@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { authRequest } from "../auth/api";
 import RemindersScreen from "../reminders/RemindersScreen";
 import ZenMonk from "../chat/ZenMonk";
+import PhotoBanner from "../components/PhotoBanner";
 import { colors } from "../theme/colors";
 
 type CheckIn = { id: number; mood: string; createdAt: string };
@@ -103,7 +104,8 @@ export default function WellnessHome({ name, token, page, setPage }: {
           {page === "Home" ? `Welcome, ${name}.` : page}
         </Text>
         {page === "Home" && <>
-          <View style={styles.card}>
+          <PhotoBanner scene="forest" />
+          <View style={[styles.card, styles.affirmation]}>
             <Text style={styles.cardTitle}>Today’s affirmation</Text>
             <Text style={styles.body}>You can begin again, as many times as it takes.</Text>
             {history[0] ? <Text style={styles.body}>Latest check-in: {history[0].mood}</Text> : null}
@@ -163,8 +165,9 @@ const styles = StyleSheet.create({
   shell: { flex: 1 },
   content: { width: "100%", maxWidth: 480, alignSelf: "center", padding: 24, gap: 12 },
   brand: { color: colors.accent, fontSize: 19, fontWeight: "700" },
-  title: { color: colors.text, fontFamily: "serif", fontSize: 34, fontWeight: "700" },
+  title: { color: colors.text, fontFamily: Platform.select({ ios: "Georgia", android: "serif" }), fontSize: 34, fontWeight: "700" },
   card: { padding: 16, borderRadius: 16, backgroundColor: colors.softIvory, gap: 8 },
+  affirmation: { backgroundColor: "#E1E8D7" },
   cardTitle: { color: colors.text, fontSize: 18, fontWeight: "700" },
   body: { color: colors.mutedText, fontSize: 16, lineHeight: 24 },
   button: { minHeight: 48, justifyContent: "center", alignItems: "center", borderRadius: 14, backgroundColor: colors.button },

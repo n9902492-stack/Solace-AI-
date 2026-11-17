@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import PhotoBanner from "../components/PhotoBanner";
 import { colors } from "../theme/colors";
 
 type Props = {
@@ -27,6 +28,7 @@ export default function AuthScreen({ onSubmit }: Props) {
   return (
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
       <Text style={styles.brand}>Solace</Text>
+      <PhotoBanner scene="plant" />
       <Text accessibilityRole="header" style={styles.title}>{signup ? "Create your account" : "Welcome back"}</Text>
       {signup && <TextInput style={styles.input} placeholder="Name" placeholderTextColor={colors.mutedText} accessibilityLabel="Name" autoComplete="name" value={name} onChangeText={setName} maxLength={80} />}
       <TextInput style={styles.input} placeholder="Email" placeholderTextColor={colors.mutedText} accessibilityLabel="Email" autoComplete="email" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} maxLength={254} />
@@ -46,8 +48,8 @@ export default function AuthScreen({ onSubmit }: Props) {
 const styles = StyleSheet.create({
   content: { width: "100%", maxWidth: 480, alignSelf: "center", padding: 24, gap: 14 },
   brand: { color: colors.accent, fontSize: 16 },
-  title: { color: colors.text, fontSize: 32, fontWeight: "700", marginBottom: 8 },
-  input: { minHeight: 52, padding: 12, color: colors.text, borderColor: colors.mutedText, borderWidth: 1, borderRadius: 12 },
+  title: { color: colors.text, fontFamily: Platform.select({ ios: "Georgia", android: "serif" }), fontSize: 32, fontWeight: "700", marginBottom: 8 },
+  input: { minHeight: 52, padding: 12, color: colors.text, backgroundColor: "#FFFDF7", borderColor: "#B8BEAD", borderWidth: 1, borderRadius: 14 },
   button: { minHeight: 52, justifyContent: "center", alignItems: "center", backgroundColor: colors.button, borderRadius: 18 },
   buttonText: { color: colors.buttonText, fontWeight: "700", fontSize: 16 },
   link: { minHeight: 44, alignItems: "center", justifyContent: "center" },
