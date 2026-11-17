@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { authRequest } from "../auth/api";
+import RemindersScreen from "../reminders/RemindersScreen";
 import ZenMonk from "../chat/ZenMonk";
 import { colors } from "../theme/colors";
 
 type CheckIn = { id: number; mood: string; createdAt: string };
 
-type Page = "Home" | "Check-in" | "Breathe" | "Resources" | "Zen Monk";
+export type Page = "Home" | "Check-in" | "Breathe" | "Resources" | "Zen Monk" | "Reminders";
 
 const activities = [
   ["Check-in", "Notice how you feel today"],
@@ -59,8 +60,9 @@ function Breathing() {
   );
 }
 
-export default function WellnessHome({ name, token }: { name: string; token: string }) {
-  const [page, setPage] = useState<Page>("Home");
+export default function WellnessHome({ name, token, page, setPage }: {
+  name: string; token: string; page: Page; setPage: (page: Page) => void;
+}) {
   const [mood, setMood] = useState("");
   const [history, setHistory] = useState<CheckIn[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,6 +108,7 @@ export default function WellnessHome({ name, token }: { name: string; token: str
             <Text style={styles.body}>You can begin again, as many times as it takes.</Text>
             {history[0] ? <Text style={styles.body}>Latest check-in: {history[0].mood}</Text> : null}
           </View>
+          <Action label="Reminders" onPress={() => setPage("Reminders")} />
           {activities.map(([label, detail]) => (
             <Pressable key={label} accessibilityRole="button" style={styles.card} onPress={() => setPage(label)}>
               <Text style={styles.cardTitle}>{label}</Text>
@@ -141,6 +144,7 @@ export default function WellnessHome({ name, token }: { name: string; token: str
             {guide === label && <Text style={styles.body}>{detail}</Text>}
           </Pressable>
         ))}
+        {page === "Reminders" && <RemindersScreen />}
         {page === "Zen Monk" && <ZenMonk token={token} />}
       </ScrollView>
       <View style={styles.nav}>

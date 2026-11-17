@@ -3,15 +3,27 @@ import { ActivityIndicator, Pressable, StatusBar, StyleSheet, Text } from "react
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import Welcome from "./src/screens/Welcome";
-import WellnessHome from "./src/screens/WellnessHome";
+import * as Notifications from "expo-notifications";
+import WellnessHome, { type Page } from "./src/screens/WellnessHome";
+import { reminderDestination } from "./src/reminders/schedule";
 import AuthScreen from "./src/auth/AuthScreen";
 import { ApiError, authRequest } from "./src/auth/api";
 import { colors } from "./src/theme/colors";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const sessionKey = "solace.session";
 
 export default function App() {
   const [screen, setScreen] = useState<"loading" | "splash" | "onboarding" | "auth" | "home">("loading");
+  const [page, setPage] = useState<Page>("Home");
   const [token, setToken] = useState("");
   const [name, setName] = useState("");
   const [sessionError, setSessionError] = useState("");
@@ -44,6 +56,19 @@ export default function App() {
 
   useEffect(() => { void restore(); }, []);
 
+  useEffect(() => {
+    function openReminder(response: Notifications.NotificationResponse | null) {
+      const destination = reminderDestination(response);
+      if (!destination) return;
+      setPage(destination);
+      void Notifications.clearLastNotificationResponseAsync().catch(() => {});
+    }
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(openReminder);
+    openReminder(Notifications.getLastNotificationResponse());
+    return () => subscription.remove();
+  }, []);
+
   async function logout() {
     if (loggingOut) return;
     setLoggingOut(true);
@@ -54,6 +79,7 @@ export default function App() {
       await SecureStore.deleteItemAsync(sessionKey);
       setToken("");
       setName("");
+      setPage("Home");
       setScreen("auth");
     } catch {
       setSessionError("Could not log out. Please try again.");
@@ -84,7 +110,7 @@ export default function App() {
           }} />
         )}
         {screen === "home" && <>
-          <WellnessHome name={name} token={token} />
+          <WellnessHome name={name} token={token} page={page} setPage={setPage} />
           <Pressable accessibilityRole="button" disabled={loggingOut} onPress={logout}>
             <Text style={styles.action}>{loggingOut ? "Logging out…" : "Log out"}</Text>
           </Pressable>

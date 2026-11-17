@@ -8,6 +8,9 @@
     },
     "android": {
       "package": "com.solace.wellness"
-    }
+    },
+    "plugins": [
+      "expo-notifications"
+    ]
   }
 }
